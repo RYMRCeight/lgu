@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
     function updateVisibility() {
-        const publicButton = document.getElementById('public-page-button');
+        const adminButton = document.getElementById('admin-page-button');
 const adminButton = document.getElementById('admin-page-button');
         const contactButton = document.getElementById('contact-developer-button');
         
@@ -75,7 +75,15 @@ if (isLoggedIn) {
         } else {
             adminButton.style.display = 'block';
             contactButton.style.display = 'block';
+        const contactButton = document.getElementById('contact-developer-button');
+        if (isLoggedIn) {
+            adminButton.style.display = 'none';
+            contactButton.style.display = 'none';
+        } else {
+            adminButton.style.display = 'block';
+            contactButton.style.display = 'block';
         }
+    }
     }
 
     // Call updateVisibility on page load
