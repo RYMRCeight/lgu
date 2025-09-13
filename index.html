@@ -69,14 +69,14 @@ let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 const adminButton = document.getElementById('admin-page-button');
         const contactButton = document.getElementById('contact-developer-button');
         
-        if (isLoggedIn) {
-            publicButton.style.display = 'none';
-adminButton.style.display = 'none';
-                contactButton.style.display = 'none';
+if (isLoggedIn) {
+            publicButton.disabled = true;
+            adminButton.disabled = true;
+            contactButton.disabled = true;
         } else {
-            publicButton.style.display = 'block';
-adminButton.style.display = 'block';
-                contactButton.style.display = 'block';
+            publicButton.disabled = false;
+            adminButton.disabled = false;
+            contactButton.disabled = false;
         }
     }
 
