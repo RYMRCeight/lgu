@@ -59,7 +59,32 @@ font-family: 'Inter', sans-serif;
                 <button id="contact-developer-button" class="text-gray-600 hover:text-gray-900 font-medium transition">Contact Developer</button>
             </nav>
         </div>
-    </header>
+    <script>
+        // Simulate login state
+        let isLoggedIn = false; // Change to true when logged in
+
+        function updateVisibility() {
+            const publicButton = document.getElementById('public-page-button');
+            const contactButton = document.getElementById('contact-developer-button');
+            
+            if (isLoggedIn) {
+                publicButton.style.display = 'none';
+                contactButton.style.display = 'none';
+            } else {
+                publicButton.style.display = 'block';
+                contactButton.style.display = 'block';
+            }
+        }
+
+        // Example: call this function after login status changes
+        document.getElementById('admin-login-btn').addEventListener('click', function() {
+            isLoggedIn = !isLoggedIn; // toggle for demo purposes
+            updateVisibility();
+        });
+
+        updateVisibility(); // Initial call
+    </script>
+</header>
 
     <main class="py-10">
         <div id="app-container" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
