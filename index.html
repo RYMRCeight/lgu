@@ -1,8 +1,5 @@
-
 <!DOCTYPE html>
-
 <html lang="en" class="h-full bg-gray-100">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,7 +50,7 @@ font-family: 'Inter', sans-serif;
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between">
             <div class="flex items-center mb-4 sm:mb-0">
-                <img id="site-logo" src="[https://placehold.co/40x40/8B5CF6/FFFFFF?text=LGU](https://placehold.co/40x40/8B5CF6/FFFFFF?text=LGU)" alt="LGU Tangalan Logo" class="h-10 w-10 rounded-full mr-3">
+                <img id="site-logo" src="https://placehold.co/40x40/8B5CF6/FFFFFF?text=LGU" alt="LGU Tangalan Logo" class="h-10 w-10 rounded-full mr-3">
                 <h1 class="text-xl font-bold tracking-tight text-gray-900">LGU Tangalan - Document Tracking System</h1>
             </div>
             <nav class="flex space-x-4 mt-4 sm:mt-0">
@@ -68,7 +65,7 @@ font-family: 'Inter', sans-serif;
         <div id="app-container" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
             <div id="loading-page" class="flex flex-col items-center justify-center min-h-64 hidden fade-in">
-                <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -97,7 +94,7 @@ font-family: 'Inter', sans-serif;
                 <div id="public-results-container" class="space-y-4">
                     </div>
                 <div id="public-loading-indicator" class="text-center text-gray-500 py-20 hidden">
-                    <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -201,7 +198,7 @@ font-family: 'Inter', sans-serif;
                         <div id="document-list-container" class="space-y-4">
                             </div>
                         <div id="admin-loading-indicator" class="text-center text-gray-500 py-20 hidden">
-                            <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.291 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -303,7 +300,7 @@ font-family: 'Inter', sans-serif;
 
 <script>
     // Supabase Client Initialization
-    const SUPABASE_URL = '[https://zopmrkatcvfcedlzmhpy.supabase.co](https://zopmrkatcvfcedlzmhpy.supabase.co)';
+    const SUPABASE_URL = 'https://zopmrkatcvfcedlzmhpy.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG1ya2F0Y3ZmY2VkbHptaHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NjU1MDgsImV4cCI6MjA3MzI0MTUwOH0.T2adp6-XeIgnLsmFD8__0jZW_h5AIr2tTK1kg_o4EDU';
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
