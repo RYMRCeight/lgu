@@ -70,13 +70,11 @@ const adminButton = document.getElementById('admin-page-button');
         const contactButton = document.getElementById('contact-developer-button');
         
 if (isLoggedIn) {
-            publicButton.disabled = true;
-            adminButton.disabled = true;
-            contactButton.disabled = true;
+            adminButton.style.display = 'none';
+            contactButton.style.display = 'none';
         } else {
-            publicButton.disabled = false;
-            adminButton.disabled = false;
-            contactButton.disabled = false;
+            adminButton.style.display = 'block';
+            contactButton.style.display = 'block';
         }
     }
 
