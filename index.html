@@ -94,7 +94,22 @@ if (isLoggedIn) {
         updateVisibility();
 ('isLoggedIn', 'true');
         updateVisibility();
-    });
+   });
+
+   // Add event listeners for public and contact developer buttons
+   publicButton.addEventListener('click', function() {
+       if (!isLoggedIn) {
+           // Add behavior for public button
+           console.log('Public button clicked');
+       }
+   });
+
+   contactButton.addEventListener('click', function() {
+       if (!isLoggedIn) {
+           // Add behavior for contact developer button
+           console.log('Contact Developer button clicked');
+       }
+   });
 
     signOutButton.addEventListener('click', function() {
         isLoggedIn = false;
