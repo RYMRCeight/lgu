@@ -436,19 +436,21 @@
         supabase.auth.onAuthStateChange((event, session) => {
             isAuthReady = true;
             if (session) {
-                // User is logged in, show the admin content
+                // User is logged in, show the admin content and hide the admin button
                 adminPage.classList.remove('hidden');
                 adminLoginContainer.classList.add('hidden');
                 adminContent.classList.remove('hidden');
+                adminPageButton.style.display = 'none'; // Hide the Admin button
                 fetchDocuments();
                 fetchDepartments();
                 fetchStatuses();
                 fetchSiteConfigs();
             } else {
-                // User is not logged in, show the login form
+                // User is not logged in, show the login form and show the admin button
                 adminPage.classList.remove('hidden');
                 adminLoginContainer.classList.remove('hidden');
                 adminContent.classList.add('hidden');
+                adminPageButton.style.display = 'block'; // Show the Admin button
             }
         });
 
