@@ -524,6 +524,7 @@ if (isLoggedIn) {
             adminLoginContainer.classList.add('hidden');
             adminContent.classList.remove('hidden');
             adminPageButton.style.display = 'none'; // Hide the Admin button
+            contactDeveloperButton.style.display = 'none'; // Hide the Contact Developer button
             fetchDocuments();
             fetchDepartments();
             fetchStatuses();
@@ -534,6 +535,7 @@ if (isLoggedIn) {
             adminLoginContainer.classList.remove('hidden');
             adminContent.classList.add('hidden');
             adminPageButton.style.display = 'block'; // Show the Admin button
+            contactDeveloperButton.style.display = 'block'; // Show the Contact Developer button
         }
     });
 
