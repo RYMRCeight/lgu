@@ -339,39 +339,6 @@ if (isLoggedIn) {
     </div>
 </div>
 
- <div id="contact-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center fade-in">
-    <div class="relative bg-white p-8 sm:p-12 rounded-lg shadow-xl w-11/12 md:w-2/3 lg:w-1/2 max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0" id="contact-modal-content">
-        <div class="flex justify-between items-start mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">Contact Developer</h3>
-            <button id="close-contact-modal-btn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-        </div>
-        
-        <div class="flex justify-around items-center space-x-4 py-8">
-            <a href="https://www.facebook.com/tech.reymarctampos/" target="_blank" class="contact-icon text-gray-500 hover:text-blue-600 transform hover:scale-110 transition-all duration-300">
-                <svg class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 13.5h2.5l1-4H14V7.5c0-1.24 1.229-2.25 2.5-2.25h1.5V1H16c-3.15 0-4 2.35-4 4v3.5h-3v4H12V22h5c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.5c-.83 0-1.5.67-1.5 1.5V10h-2v3.5z"/>
-                </svg>
-            </a>
-            
-            <a href="https://www.linkedin.com/in/reymarcjason-tech/" target="_blank" class="contact-icon text-gray-500 hover:text-blue-700 transform hover:scale-110 transition-all duration-300">
-                <svg class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zm-5 13.5h2.5V11H14v5.5zm-5-13.5h-2.5V11H9v5.5z"/>
-                </svg>
-            </a>
-            
-            <a href="mailto:reymarc.tampos@gmail.com" class="contact-icon text-gray-500 hover:text-red-600 transform hover:scale-110 transition-all duration-300">
-                <svg class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M22 6.5C22 5.67 21.33 5 20.5 5h-17C2.67 5 2 5.67 2 6.5v11C2 18.33 2.67 19 3.5 19h17c.83 0 1.5-.67 1.5-1.5v-11zM20 7L12 11.5 4 7v-1.5L12 10 20 5.5V7z"/>
-                </svg>
-            </a>
-        </div>
-    </div>
-</div>
-
 <div id="status-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-[100] p-4">
     <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm m-4 text-center modal-content">
         <p id="status-message" class="text-gray-800 font-medium"></p>
@@ -1181,27 +1148,6 @@ if (isLoggedIn) {
     addStatusBtn.addEventListener('click', handleStatusSubmit);
     uploadLogoButton.addEventListener('click', uploadLogo);
     
-   // New event listeners for the contact modal
-    contactDeveloperButton.addEventListener('click', () => {
-        const contactModal = document.getElementById('contact-modal');
-        const contactModalContent = document.getElementById('contact-modal-content');
-        contactModal.classList.remove('hidden');
-        setTimeout(() => {
-            contactModalContent.classList.remove('scale-95', 'opacity-0');
-            contactModalContent.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    });
-
-    const closeContactModalBtn = document.getElementById('close-contact-modal-btn');
-    closeContactModalBtn.addEventListener('click', () => {
-        const contactModal = document.getElementById('contact-modal');
-        const contactModalContent = document.getElementById('contact-modal-content');
-        contactModalContent.classList.remove('scale-100', 'opacity-100');
-        contactModalContent.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => {
-            contactModal.classList.add('hidden');
-        }, 300);
-    });
     // Initial view setup
     fetchSiteConfigs();
     showPage('public');
