@@ -62,18 +62,21 @@ font-family: 'Inter', sans-serif;
     <script>
         // Simulate login state
 document.addEventListener('DOMContentLoaded', function() {
-    let isLoggedIn = true; // Set to true for demo purposes
+    let isLoggedIn = false; // Assume initially not logged in
 
     function updateVisibility() {
         const publicButton = document.getElementById('public-page-button');
+const adminButton = document.getElementById('admin-page-button');
         const contactButton = document.getElementById('contact-developer-button');
         
         if (isLoggedIn) {
             publicButton.style.display = 'none';
-            contactButton.style.display = 'none';
+adminButton.style.display = 'none';
+                contactButton.style.display = 'none';
         } else {
             publicButton.style.display = 'block';
-            contactButton.style.display = 'block';
+adminButton.style.display = 'block';
+                contactButton.style.display = 'block';
         }
     }
 
@@ -81,8 +84,16 @@ document.addEventListener('DOMContentLoaded', function() {
     updateVisibility();
 
     // Toggle for demo purposes
-    document.getElementById('admin-login-btn').addEventListener('click', function() {
-        isLoggedIn = !isLoggedIn;
+    const loginButton = document.getElementById('admin-login-btn');
+    const signOutButton = document.getElementById('sign-out-btn');
+
+    loginButton.addEventListener('click', function() {
+        isLoggedIn = true;
+        updateVisibility();
+    });
+
+    signOutButton.addEventListener('click', function() {
+        isLoggedIn = false;
         updateVisibility();
     });
 });
