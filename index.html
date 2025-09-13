@@ -89,6 +89,7 @@ adminButton.style.display = 'block';
 
     loginButton.addEventListener('click', function() {
         isLoggedIn = true;
+        isLoggedIn = false;
         localStorage.setItem('isLoggedIn', 'false');
         updateVisibility();
 ('isLoggedIn', 'true');
