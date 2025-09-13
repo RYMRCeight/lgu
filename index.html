@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGU Tangalan - Document Tracking System</title>
+    <meta name="description" content="Official Document Tracking System for the Local Government Unit of Tangalan, Aklan.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .lgu-gradient {
+            background-image: linear-gradient(to right, #2563EB, #1D4ED8);
+        }
+
+        .document-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .modal-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+
+<body class="h-full">
+
+    <div class="min-h-full">
+
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between">
+                <div class="flex items-center mb-4 sm:mb-0">
+                    <img id="site-logo" src="https://placehold.co/40x40/8B5CF6/FFFFFF?text=LGU" alt="LGU Tangalan Logo" class="h-10 w-10 rounded-full mr-3">
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900">LGU Tangalan - Document Tracking System</h1>
+                </div>
+                <nav class="flex space-x-4 mt-4 sm:mt-0">
+                    <button id="public-page-button" class="text-gray-600 hover:text-gray-900 font-medium transition">Public</button>
+                    <button id="admin-page-button" class="text-gray-600 hover:text-gray-900 font-medium transition">Admin</button>
+                    <button id="contact-developer-button" class="text-gray-600 hover:text-gray-900 font-medium transition">Contact Developer</button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="py-10">
+            <div id="app-container" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+                <div id="loading-page" class="flex flex-col items-center justify-center min-h-64 hidden fade-in">
+                    <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <h3 class="mt-4 text-sm font-semibold text-gray-900">Loading...</h3>
+                </div>
+
+                <div id="public-page" class="hidden fade-in">
+                    <section class="mb-10 text-center">
+                        <h2 class="text-2xl font-semibold leading-tight text-gray-900 mb-4">Track a Document</h2>
+                        <p class="text-gray-600 mb-6">Enter the document number or title and the submitter's name to check its status.</p>
+                        <div class="relative max-w-md mx-auto space-y-4">
+                            <div>
+                                <input type="text" id="public-search" placeholder="Enter Document Number or Title" class="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div>
+                                <input type="text" id="public-submitter-name" placeholder="Enter Submitter's Name" class="block w-full rounded-md border-0 py-2 pl-3 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition">
+                            </div>
+                            <button id="public-search-btn" class="w-full rounded-md lgu-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">Search</button>
+                        </div>
+                    </section>
+                    <div id="public-results-container" class="space-y-4">
+                        </div>
+                    <div id="public-loading-indicator" class="text-center text-gray-500 py-20 hidden">
+                        <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900">Searching...</h3>
+                    </div>
+                    <div id="public-no-results" class="text-center text-gray-500 py-20 hidden">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 2a9 9 0 1118 0v-2a9 9 0 00-18 0v2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900">Document not found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Please check the document number or title and try again.</p>
+                    </div>
+                </div>
+
+                <div id="admin-page" class="hidden fade-in">
+                    <div id="admin-login-form" class="max-w-md mx-auto p-8 bg-white rounded-lg shadow-md hidden">
+                        <h2 class="text-2xl font-semibold leading-tight text-gray-900 text-center mb-6">Admin Login</h2>
+                        <form id="login-form" class="space-y-4">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" id="admin-email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" id="admin-password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <button type="submit" id="admin-login-btn" class="w-full rounded-md lgu-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">Login</button>
+                        </form>
+                        <p id="login-error-message" class="text-red-500 text-sm mt-4 text-center hidden"></p>
+                    </div>
+
+                    <div id="admin-content" class="hidden">
+                        <div class="flex flex-col sm:flex-row items-center justify-between mb-6">
+                            <h2 class="text-xl font-semibold leading-tight text-gray-900 mb-4 sm:mb-0">Admin Dashboard</h2>
+                            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                <button id="add-document-btn" class="w-full sm:w-auto rounded-md lgu-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition">
+                                    New Document
+                                </button>
+                                <button id="sign-out-btn" class="w-full sm:w-auto rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
+
+                        <section class="mb-10 fade-in">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Site Settings</h3>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <p class="text-sm text-gray-600 mb-4">Manage site-wide settings like the logo.</p>
+                                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                                    <label for="logo-file-input" class="block text-sm font-medium text-gray-700 w-full sm:w-auto">
+                                        Upload Logo:
+                                        <input type="file" id="logo-file-input" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                    </label>
+                                    <button id="upload-logo-button" class="mt-2 sm:mt-0 px-4 py-2 bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200">
+                                        Upload
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-10 fade-in">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Departments Management</h3>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <p class="text-sm text-gray-600 mb-4">Add new departments that can be assigned to documents.</p>
+                                <div class="flex items-center w-full">
+                                    <input type="text" id="new-department-name" placeholder="New Department Name" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    <button id="add-department-btn" class="ml-2 rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+                                        Add Department
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-10 fade-in">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Statuses</h3>
+                            <div class="flex items-center w-full mb-4">
+                                <input type="text" id="new-status-name" placeholder="New Status Name" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                <button id="add-status-btn" class="ml-2 rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+                                    Add Status
+                                </button>
+                            </div>
+                            <div id="statuses-list-container" class="space-y-2">
+                                </div>
+                        </section>
+
+                        <section class="mb-10 fade-in">
+                            <div id="stats-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                </div>
+                        </section>
+
+                        <section class="fade-in">
+                            <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+                                <h2 class="text-xl font-semibold leading-tight text-gray-900 mb-4 sm:mb-0">All Documents</h2>
+                                <div class="flex items-center space-x-4">
+                                    <label for="department-filter" class="text-gray-700 text-sm font-medium hidden md:block">Filter by Department:</label>
+                                    <select id="department-filter" class="rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                                        <option value="All">All Departments</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="document-list-container" class="space-y-4">
+                                </div>
+                            <div id="admin-loading-indicator" class="text-center text-gray-500 py-20 hidden">
+                                <svg class="animate-spin mx-auto h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.291 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <h3 class="mt-2 text-sm font-semibold text-gray-900">Loading documents...</h3>
+                            </div>
+                            <div id="no-results" class="text-center text-gray-500 py-20 hidden">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 2a9 9 0 1118 0v-2a9 9 0 00-18 0v2z" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-semibold text-gray-900">No documents found</h3>
+                                <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-backdrop" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-[100] p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg m-4">
+            <h3 id="modal-title" class="text-xl font-semibold mb-4">Add New Document</h3>
+            <form id="document-form" class="space-y-4">
+                <div>
+                    <label for="document-title" class="block text-sm font-medium text-gray-700">Document Title</label>
+                    <input type="text" id="document-title" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="document-department" class="block text-sm font-medium text-gray-700">Department</label>
+                    <select id="document-department" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <option value="">Select a Department</option>
+                        </select>
+                </div>
+                <div>
+                    <label for="document-submitter" class="block text-sm font-medium text-gray-700">Submitter Name</label>
+                    <input type="text" id="document-submitter" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="document-status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="document-status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <option value="">Select a Status</option>
+                        </select>
+                </div>
+                <input type="hidden" id="document-id">
+                <div class="mt-6 flex justify-between items-center">
+                    <button type="button" id="delete-document-btn" class="text-sm font-semibold text-red-600 hover:text-red-900 hidden">Delete</button>
+                    <div>
+                        <button type="button" id="close-modal-btn" class="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 mr-2">Cancel</button>
+                        <button type="submit" id="document-save-btn" class="rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">Save Document</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-[100] p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm m-4 modal-content">
+            <h3 class="text-xl font-semibold mb-4 text-gray-900">Contact the Developer</h3>
+            <form id="contact-form" class="space-y-4">
+                <div>
+                    <label for="contact-name" class="block text-sm font-medium text-gray-700">Your Name</label>
+                    <input type="text" id="contact-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="contact-email" class="block text-sm font-medium text-gray-700">Your Email</label>
+                    <input type="email" id="contact-email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea id="contact-message" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                </div>
+                <div class="mt-6 flex justify-end items-center space-x-2">
+                    <button type="button" id="close-contact-modal" class="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>
+                    <button type="submit" id="send-message-btn" class="rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">Send Message</button>
+                </div>
+            </form>
+            <div id="contact-message-box" class="mt-4 hidden p-3 rounded-lg border border-transparent text-center text-sm"></div>
+        </div>
+    </div>
+
+
+    <div id="status-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-[100] p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm m-4 text-center modal-content">
+            <p id="status-message" class="text-gray-800 font-medium"></p>
+            <button id="close-status-modal" class="mt-4 rounded-md lgu-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">OK</button>
+        </div>
+    </div>
+
+    <div id="confirm-modal-backdrop" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-[100] p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm m-4 text-center modal-content">
+            <p id="confirm-message" class="text-gray-800 font-medium"></p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <button id="confirm-yes-btn" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700">Yes</button>
+                <button id="confirm-no-btn" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Client Initialization
+        const SUPABASE_URL = 'https://zopmrkatcvfcedlzmhpy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG1ya2F0Y3ZmY2VkbHptaHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NjU1MDgsImV4cCI6MjA3MzI0MTUwOH0.T2adp6-XeIgnLsmFD8__0jZW_h5AIr2tTK1kg_o4EDU';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let documents = [];
+        let departments = [];
+        let statuses = [];
+        let isAuthReady = false;
+
+        // UI elements
+        const loadingPage = document.getElementById('loading-page');
+        const publicPage = document.getElementById('public-page');
+        const adminPage = document.getElementById('admin-page');
+        const publicPageButton = document.getElementById('public-page-button');
+        const adminPageButton = document.getElementById('admin-page-button');
+        const contactDeveloperButton = document.getElementById('contact-developer-button');
+
+        const publicSearchInput = document.getElementById('public-search');
+        const publicSubmitterInput = document.getElementById('public-submitter-name');
+        const publicSearchBtn = document.getElementById('public-search-btn');
+        const publicResultsContainer = document.getElementById('public-results-container');
+        const publicLoadingIndicator = document.getElementById('public-loading-indicator');
+        const publicNoResults = document.getElementById('public-no-results');
+
+        const adminLoginContainer = document.getElementById('admin-login-form');
+        const adminContent = document.getElementById('admin-content');
+        const loginForm = document.getElementById('login-form');
+        const adminEmailInput = document.getElementById('admin-email');
+        const adminPasswordInput = document.getElementById('admin-password');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const signOutBtn = document.getElementById('sign-out-btn');
+
+        const logoFileInput = document.getElementById('logo-file-input');
+        const uploadLogoButton = document.getElementById('upload-logo-button');
+        const siteLogo = document.getElementById('site-logo');
+
+        const newDepartmentNameInput = document.getElementById('new-department-name');
+        const addDepartmentBtn = document.getElementById('add-department-btn');
+        const newStatusNameInput = document.getElementById('new-status-name');
+        const addStatusBtn = document.getElementById('add-status-btn');
+        const statusesListContainer = document.getElementById('statuses-list-container');
+        let editingStatusId = null;
+
+        const documentListContainer = document.getElementById('document-list-container');
+        const departmentFilter = document.getElementById('department-filter');
+        const statsContainer = document.getElementById('stats-container');
+        const noResults = document.getElementById('no-results');
+        const adminLoadingIndicator = document.getElementById('admin-loading-indicator');
+        const addDocumentBtn = document.getElementById('add-document-btn');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const documentForm = document.getElementById('document-form');
+        const modalTitle = document.getElementById('modal-title');
+        const deleteDocumentBtn = document.getElementById('delete-document-btn');
+        const documentSaveBtn = document.getElementById('document-save-btn');
+        const documentIdInput = document.getElementById('document-id');
+        const documentTitleInput = document.getElementById('document-title');
+        const documentDepartmentInput = document.getElementById('document-department');
+        const documentSubmitterInput = document.getElementById('document-submitter');
+        const documentStatusInput = document.getElementById('document-status');
+
+        const statusModal = document.getElementById('status-modal');
+        const statusMessage = document.getElementById('status-message');
+        const closeStatusModalBtn = document.getElementById('close-status-modal');
+        
+        const contactModal = document.getElementById('contact-modal');
+        const closeContactModalBtn = document.getElementById('close-contact-modal');
+        const contactForm = document.getElementById('contact-form');
+        const contactMessageBox = document.getElementById('contact-message-box');
+
+        const confirmModalBackdrop = document.getElementById('confirm-modal-backdrop');
+        const confirmMessage = document.getElementById('confirm-message');
+        const confirmYesBtn = document.getElementById('confirm-yes-btn');
+        const confirmNoBtn = document.getElementById('confirm-no-btn');
+        let confirmAction = null;
+
+
+        // Simple client-side router
+        function showPage(pageName) {
+            publicPage.classList.add('hidden');
+            adminPage.classList.add('hidden');
+            loadingPage.classList.add('hidden');
+
+            if (pageName === 'public') {
+                publicPage.classList.remove('hidden');
+            } else if (pageName === 'admin') {
+                // If auth is checked, show the correct admin view, otherwise show loading
+                if (isAuthReady) {
+                    const session = supabase.auth.getSession();
+                    if (session && session.data && session.data.session) {
+                        adminPage.classList.remove('hidden');
+                        adminLoginContainer.classList.add('hidden');
+                        adminContent.classList.remove('hidden');
+                    } else {
+                        adminPage.classList.remove('hidden');
+                        adminLoginContainer.classList.remove('hidden');
+                        adminContent.classList.add('hidden');
+                    }
+                } else {
+                    loadingPage.classList.remove('hidden');
+                }
+            }
+        }
+
+        function showStatusModal(message) {
+            statusMessage.textContent = message;
+            statusModal.classList.remove('hidden');
+        }
+
+        function showConfirmModal(message, callback) {
+            confirmMessage.textContent = message;
+            confirmAction = callback;
+            confirmModalBackdrop.classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            confirmModalBackdrop.classList.add('hidden');
+            confirmAction = null;
+        }
+
+        function renderAllAdminContent() {
+            renderDepartments();
+            renderStatuses();
+            renderStats();
+            filterDocuments(); // Renders the document list
+        }
+
+
+        // --- Supabase Auth Logic ---
+        // This listener will check for authentication state changes (login/logout)
+        supabase.auth.onAuthStateChange((event, session) => {
+            isAuthReady = true;
+            if (session) {
+                // User is logged in, show the admin content
+                adminPage.classList.remove('hidden');
+                adminLoginContainer.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                fetchDocuments();
+                fetchDepartments();
+                fetchStatuses();
+                fetchSiteConfigs();
+            } else {
+                // User is not logged in, show the login form
+                adminPage.classList.remove('hidden');
+                adminLoginContainer.classList.remove('hidden');
+                adminContent.classList.add('hidden');
+            }
+        });
+
+        async function signIn(e) {
+            e.preventDefault();
+            loginErrorMessage.classList.add('hidden');
+            
+            // Add immediate visual feedback
+            adminLoginBtn.disabled = true;
+            adminLoginBtn.textContent = 'Logging In...';
+            
+            const email = adminEmailInput.value;
+            const password = adminPasswordInput.value;
+
+            try {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    console.error(error.message);
+                    loginErrorMessage.textContent = error.message;
+                    loginErrorMessage.classList.remove('hidden');
+                } else {
+                    // Success is handled by onAuthStateChange listener
+                    loginForm.reset();
+                }
+            } catch (err) {
+                console.error('An unexpected error occurred:', err);
+                loginErrorMessage.textContent = 'An unexpected error occurred. Please try again.';
+                loginErrorMessage.classList.remove('hidden');
+            } finally {
+                // Reset button state in all cases
+                adminLoginBtn.disabled = false;
+                adminLoginBtn.textContent = 'Login';
+            }
+        }
+
+        async function handleSignOut() {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                console.error('Error signing out:', error.message);
+            }
+            showStatusModal('You have been successfully signed out.');
+        }
+
+        // --- Public Page Logic ---
+        async function searchPublicDocuments() {
+            const searchTerm = publicSearchInput.value.toLowerCase().trim();
+            const submitterName = publicSubmitterInput.value.toLowerCase().trim();
+
+            publicResultsContainer.innerHTML = '';
+            publicNoResults.classList.add('hidden');
+            
+            if (!searchTerm || !submitterName) {
+                publicNoResults.querySelector('h3').textContent = "Please enter both search terms.";
+                publicNoResults.querySelector('p').textContent = "";
+                publicNoResults.classList.remove('hidden');
+                return;
+            }
+
+            publicLoadingIndicator.classList.remove('hidden');
+
+            const { data, error } = await supabase
+                .from('documents')
+                .select('*')
+                .ilike('submitter', `%${submitterName}%`)
+                .or(`documentNumber.ilike.%${searchTerm}%,title.ilike.%${searchTerm}%`);
+
+            publicLoadingIndicator.classList.add('hidden');
+
+            if (error) {
+                console.error('Error searching documents:', error.message);
+                return;
+            }
+
+            if (data.length === 0) {
+                publicNoResults.querySelector('h3').textContent = "Document not found";
+                publicNoResults.querySelector('p').textContent = "Please check the document number/title and submitter's name and try again.";
+                publicNoResults.classList.remove('hidden');
+            } else {
+                publicResultsContainer.innerHTML = data.map(doc => {
+                    const createdAt = new Date(doc.created_at).toLocaleString();
+                    const updatedAt = new Date(doc.updated_at).toLocaleString();
+                    return `
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-semibold text-gray-800">${doc.title}</h3>
+                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 ring-1 ring-inset ring-gray-200">
+                                ${doc.status}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2">
+                            <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber}
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500 mb-2">
+                            <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
+                            <span>
+                                <span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
+                            <span>Created: <span class="font-medium">${createdAt}</span></span>
+                            <span>Last Updated: <span class="font-medium">${updatedAt}</span></span>
+                        </div>
+                    </div>
+                `}).join('');
+            }
+        }
+
+        // --- Admin Page Logic ---
+        async function fetchDocuments() {
+            adminLoadingIndicator.classList.remove('hidden');
+            const { data, error } = await supabase.from('documents').select('*');
+            if (error) {
+                console.error('Error fetching documents:', error.message);
+                return;
+            }
+            // Sort documents by their document number to ensure a consistent, incremental order
+            documents = data.sort((a, b) => {
+                const numA = parseInt(a.documentNumber.split('-').pop());
+                const numB = parseInt(b.documentNumber.split('-').pop());
+                return numA - numB;
+            });
+            renderAllAdminContent();
+            adminLoadingIndicator.classList.add('hidden');
+        }
+
+        async function fetchDepartments() {
+            const { data, error } = await supabase.from('departments').select('*');
+            if (error) {
+                console.error('Error fetching departments:', error.message);
+                return;
+            }
+            departments = data.map(dept => dept.name);
+            renderDepartments();
+        }
+
+        async function fetchStatuses() {
+            const { data, error } = await supabase.from('statuses').select('*');
+            if (error) {
+                console.error('Error fetching statuses:', error.message);
+                return;
+            }
+            statuses = data; // Fetch the full object, not just the name
+            renderStatuses();
+        }
+        
+        async function addDepartment() {
+            const newDeptName = newDepartmentNameInput.value.trim();
+            if (newDeptName) {
+                const { error } = await supabase.from('departments').insert([{ name: newDeptName }]);
+                if (error) {
+                    console.error('Error adding department:', error.message);
+                } else {
+                    newDepartmentNameInput.value = '';
+                    fetchDepartments();
+                }
+            }
+        }
+        
+        async function handleStatusSubmit() {
+            const newStatusName = newStatusNameInput.value.trim();
+            if (!newStatusName) {
+                return;
+            }
+
+            if (editingStatusId) {
+                // Update existing status
+                const { error } = await supabase.from('statuses').update({ name: newStatusName }).eq('id', editingStatusId);
+                if (error) {
+                    console.error('Error updating status:', error.message);
+                } else {
+                    editingStatusId = null;
+                    newStatusNameInput.value = '';
+                    addStatusBtn.textContent = 'Add Status';
+                    addStatusBtn.className = 'ml-2 rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700';
+                    fetchStatuses();
+                }
+            } else {
+                // Add new status
+                const { error } = await supabase.from('statuses').insert([{ name: newStatusName }]);
+                if (error) {
+                    console.error('Error adding status:', error.message);
+                } else {
+                    newStatusNameInput.value = '';
+                    fetchStatuses();
+                }
+            }
+        }
+        
+        function editStatus(id, name) {
+            editingStatusId = id;
+            newStatusNameInput.value = name;
+            addStatusBtn.textContent = 'Update Status';
+            addStatusBtn.className = 'ml-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700';
+        }
+        
+        function cancelEditStatus() {
+            editingStatusId = null;
+            newStatusNameInput.value = '';
+            addStatusBtn.textContent = 'Add Status';
+            addStatusBtn.className = 'ml-2 rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700';
+        }
+
+        // Dynamically create department filter and form options
+        function renderDepartments() {
+            const allDepartments = [...new Set(departments)].sort();
+            departmentFilter.innerHTML = '<option value="All">All Departments</option>';
+            documentDepartmentInput.innerHTML = '<option value="">Select a Department</option>';
+            allDepartments.forEach(dept => {
+                const option1 = document.createElement('option');
+                option1.value = dept;
+                option1.textContent = dept;
+                departmentFilter.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = dept;
+                option2.textContent = dept;
+                documentDepartmentInput.appendChild(option2);
+            });
+        }
+        
+        // Dynamically create status form options and list
+        function renderStatuses() {
+            const allStatusNames = statuses.map(s => s.name).sort();
+            documentStatusInput.innerHTML = '<option value="">Select a Status</option>';
+            allStatusNames.forEach(statusName => {
+                const option = document.createElement('option');
+                option.value = statusName;
+                option.textContent = statusName;
+                documentStatusInput.appendChild(option);
+            });
+
+            statusesListContainer.innerHTML = statuses.sort((a,b) => a.name.localeCompare(b.name)).map(s => `
+                <div class="flex justify-between items-center bg-gray-50 rounded-md p-2">
+                    <span class="text-gray-800">${s.name}</span>
+                    <button onclick="editStatus('${s.id}', '${s.name}')" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+                </div>
+            `).join('');
+            
+            // Add "Cancel" button if editing
+            if (editingStatusId) {
+                const cancelButton = `<button onclick="cancelEditStatus()" class="ml-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>`;
+                if (!addStatusBtn.nextElementSibling || addStatusBtn.nextElementSibling.textContent !== 'Cancel') {
+                    addStatusBtn.insertAdjacentHTML('afterend', cancelButton);
+                }
+            } else {
+                if (addStatusBtn.nextElementSibling && addStatusBtn.nextElementSibling.textContent === 'Cancel') {
+                    addStatusBtn.nextElementSibling.remove();
+                }
+            }
+        }
+
+        function renderDocumentCard(doc) {
+            const statusColors = {
+                'Submitted': 'bg-blue-100 text-blue-800',
+                'Reviewing': 'bg-yellow-100 text-yellow-800',
+                'Approved': 'bg-green-100 text-green-800',
+                'Rejected': 'bg-red-100 text-red-800'
+            };
+            const statusBadgeClass = statusColors[doc.status] || 'bg-gray-100 text-gray-800';
+            
+            // Format the dates for display
+            const createdAt = new Date(doc.created_at).toLocaleString();
+            const updatedAt = new Date(doc.updated_at).toLocaleString();
+
+            return `
+                <div class="bg-white rounded-lg shadow-md p-6 document-card relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-800 truncate">${doc.title}</h3>
+                        <div class="flex items-center space-x-2 absolute top-4 right-4">
+                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusBadgeClass} ring-1 ring-inset ring-gray-200">
+                                ${doc.status}
+                            </span>
+                            <button onclick="editDocument('${doc.id}')" class="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition">
+                                <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">
+                        <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber}
+                    </p>
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                        <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
+                        <span>
+                            <span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
+                        <span>Created: <span class="font-medium">${createdAt}</span></span>
+                        <span>Last Updated: <span class="font-medium">${updatedAt}</span></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDocumentList(filteredDocuments) {
+            documentListContainer.innerHTML = '';
+            if (filteredDocuments.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                documentListContainer.innerHTML = filteredDocuments.map(renderDocumentCard).join('');
+            }
+        }
+
+        function renderStats() {
+            const total = documents.length;
+            const approved = documents.filter(d => d.status === 'Approved').length;
+            const pending = documents.filter(d => d.status === 'Reviewing' || d.status === 'Submitted').length;
+            const other = documents.filter(d => d.status !== 'Approved' && d.status !== 'Reviewing' && d.status !== 'Submitted').length;
+
+            const stats = [{
+                title: 'Total Documents',
+                value: total,
+                icon: `<svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-5 4a2 2 0 110-4 2 2 0 010 4zm-5-4a2 2 0 110-4 2 2 0 010 4zm-1-8a2 2 0 110-4 2 2 0 010 4z"/></svg>`
+            }, {
+                title: 'Pending Review',
+                value: pending,
+                icon: `<svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+            }, {
+                title: 'Documents Approved',
+                value: approved,
+                icon: `<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`
+            }, {
+                title: 'Other Statuses',
+                value: other,
+                icon: `<svg class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`
+            }];
+
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="bg-white rounded-lg shadow-md p-6 flex items-center space-x-4">
+                    <div class="rounded-full bg-gray-100 p-3">
+                        ${stat.icon}
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">${stat.title}</p>
+                        <p class="text-3xl font-bold text-gray-900">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterDocuments() {
+            const selectedDepartment = departmentFilter.value;
+
+            const filtered = documents.filter(doc => {
+                const matchesDepartment = selectedDepartment === 'All' || doc.department === selectedDepartment;
+                return matchesDepartment;
+            });
+            renderDocumentList(filtered);
+        }
+
+        // Modal Logic
+        function openModal(isEditMode = false) {
+            // CRITICAL FIX: Only reset the form when it's for a NEW document
+            if (!isEditMode) {
+                documentForm.reset();
+                documentIdInput.value = '';
+                modalTitle.textContent = "Add New Document";
+                deleteDocumentBtn.classList.add('hidden');
+            } else {
+                modalTitle.textContent = "Edit Document";
+                deleteDocumentBtn.classList.remove('hidden');
+            }
+            modalBackdrop.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modalBackdrop.classList.add('hidden');
+        }
+        
+        function openContactModal() {
+            contactModal.classList.remove('hidden');
+        }
+
+        function closeContactModal() {
+            contactModal.classList.add('hidden');
+            contactForm.reset();
+            contactMessageBox.classList.add('hidden');
+        }
+        
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            contactMessageBox.classList.remove('hidden');
+            contactMessageBox.classList.add('bg-green-100', 'text-green-700', 'border-green-400');
+            contactMessageBox.innerHTML = 'Thank you! Your message has been sent.';
+
+            setTimeout(() => {
+                closeContactModal();
+            }, 3000);
+        }
+
+        // Global functions for card click handlers
+        window.editDocument = function(docId) {
+            const docToEdit = documents.find(doc => doc.id === docId);
+            if (docToEdit) {
+                documentIdInput.value = docToEdit.id;
+                documentTitleInput.value = docToEdit.title;
+                documentDepartmentInput.value = docToEdit.department;
+                documentSubmitterInput.value = docToEdit.submitter;
+                documentStatusInput.value = docToEdit.status;
+                openModal(true);
+            }
+        };
+
+        window.editStatus = function(id, name) {
+            editingStatusId = id;
+            newStatusNameInput.value = name;
+            addStatusBtn.textContent = 'Update Status';
+            addStatusBtn.className = 'ml-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700';
+            
+            if (addStatusBtn.nextElementSibling && addStatusBtn.nextElementSibling.textContent === 'Cancel') {
+                // Cancel button already exists, no need to add another
+            } else {
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.className = 'ml-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50';
+                cancelButton.addEventListener('click', cancelEditStatus);
+                addStatusBtn.insertAdjacentElement('afterend', cancelButton);
+            }
+        };
+
+        // Real-time listener for Supabase
+        supabase.channel('public:documents')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, payload => {
+                console.log('Change received!', payload);
+                fetchDocuments(); // Re-fetch all documents on any change
+            })
+            .subscribe();
+        
+        supabase.channel('public:departments')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'departments' }, payload => {
+                console.log('Department change received!', payload);
+                fetchDepartments();
+            })
+            .subscribe();
+            
+        supabase.channel('public:statuses')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'statuses' }, payload => {
+                console.log('Status change received!', payload);
+                fetchStatuses();
+            })
+            .subscribe();
+        
+        supabase.channel('public:site_configs')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'site_configs' }, payload => {
+                console.log('Site config change received!', payload);
+                fetchSiteConfigs();
+            })
+            .subscribe();
+
+        // --- Logo Upload Logic ---
+        async function fetchSiteConfigs() {
+            const { data, error } = await supabase.from('site_configs').select('logo_url').single();
+            if (error && error.code !== 'PGRST116') { // Ignore "no rows found" error
+                console.error('Error fetching site configs:', error.message);
+                return;
+            }
+            if (data && data.logo_url) {
+                siteLogo.src = data.logo_url;
+            }
+        }
+
+        async function uploadLogo() {
+            const file = logoFileInput.files[0];
+            if (!file) {
+                showStatusModal("Please select an image file to upload.");
+                return;
+            }
+
+            // Check if the user is authenticated before proceeding
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                showStatusModal("You must be logged in as an administrator to upload a logo.");
+                return;
+            }
+
+            showStatusModal("Uploading logo...");
+            uploadLogoButton.disabled = true;
+
+            // Define the storage path
+            const filePath = `logos/lgu_logo.png`;
+
+            try {
+                // Upload the file to Supabase Storage
+                const { error: uploadError } = await supabase.storage.from('lgu-assets').upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: true
+                });
+
+                if (uploadError) throw uploadError;
+
+                // Get the public URL
+                const { data: publicUrlData } = supabase.storage.from('lgu-assets').getPublicUrl(filePath);
+                const logoUrl = publicUrlData.publicUrl;
+
+                // Save the URL to the database
+                const { error: dbError } = await supabase.from('site_configs').upsert({ id: 1, logo_url: logoUrl }, { onConflict: 'id' });
+                if (dbError) throw dbError;
+
+                showStatusModal("Logo uploaded successfully!");
+            } catch (error) {
+                console.error('Error in logo upload process:', error.message);
+                showStatusModal(`Failed to upload logo: ${error.message}`);
+            } finally {
+                uploadLogoButton.disabled = false;
+            }
+        }
+
+
+        // Event Listeners
+        publicSearchBtn.addEventListener('click', searchPublicDocuments);
+        publicSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchPublicDocuments();
+            }
+        });
+        publicSubmitterInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchPublicDocuments();
+            }
+        });
+        loginForm.addEventListener('submit', signIn);
+
+        // Sign Out with Confirmation Modal
+        signOutBtn.addEventListener('click', () => {
+            showConfirmModal('Are you sure you want to sign out?', () => {
+                handleSignOut();
+            });
+        });
+
+        // Confirmation Modal Buttons
+        confirmYesBtn.addEventListener('click', () => {
+            if (confirmAction) {
+                confirmAction();
+                closeConfirmModal();
+            }
+        });
+        confirmNoBtn.addEventListener('click', closeConfirmModal);
+
+        publicPageButton.addEventListener('click', () => showPage('public'));
+        adminPageButton.addEventListener('click', () => showPage('admin'));
+        closeStatusModalBtn.addEventListener('click', () => statusModal.classList.add('hidden'));
+
+        documentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const docId = documentIdInput.value;
+            const title = documentTitleInput.value;
+            const department = documentDepartmentInput.value;
+            const submitter = documentSubmitterInput.value;
+            const status = documentStatusInput.value;
+
+            // Generate a document number if it's a new document
+            let documentNumber = '';
+            if (!docId) {
+                const now = new Date();
+                const year = now.getFullYear().toString().slice(-2);
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const hour = now.getHours().toString().padStart(2, '0');
+                const minute = now.getMinutes().toString().padStart(2, '0');
+                const second = now.getSeconds().toString().padStart(2, '0');
+                const timestamp = `${year}${month}${day}${hour}${minute}${second}`;
+                const nextNumber = documents.length > 0 ? parseInt(documents[documents.length - 1].documentNumber.split('-').pop()) + 1 : 1;
+                documentNumber = `LGU-${timestamp}-${nextNumber}`;
+            }
+
+            const documentData = {
+                title: title,
+                department: department,
+                submitter: submitter,
+                status: status,
+                documentNumber: documentNumber || documents.find(d => d.id === docId).documentNumber,
+                processingDays: 0 // This will be calculated on a future update
+            };
+
+            documentSaveBtn.textContent = 'Saving...';
+            documentSaveBtn.disabled = true;
+
+            let error = null;
+            if (docId) {
+                // Update existing document
+                const { error: updateError } = await supabase
+                    .from('documents')
+                    .update(documentData)
+                    .eq('id', docId);
+                error = updateError;
+            } else {
+                // Add new document
+                const { error: insertError } = await supabase
+                    .from('documents')
+                    .insert([documentData]);
+                error = insertError;
+            }
+
+            documentSaveBtn.textContent = 'Save Document';
+            documentSaveBtn.disabled = false;
+            closeModal();
+            if (error) {
+                console.error('Error saving document:', error.message);
+                showStatusModal(`Error saving document: ${error.message}`);
+            } else {
+                showStatusModal(`Document saved successfully!`);
+            }
+        });
+
+        deleteDocumentBtn.addEventListener('click', () => {
+            const docId = documentIdInput.value;
+            if (docId) {
+                showConfirmModal('Are you sure you want to delete this document?', async () => {
+                    const { error } = await supabase.from('documents').delete().eq('id', docId);
+                    if (error) {
+                        console.error('Error deleting document:', error.message);
+                        showStatusModal(`Error deleting document: ${error.message}`);
+                    } else {
+                        showStatusModal(`Document deleted successfully!`);
+                    }
+                    closeModal();
+                });
+            }
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+        addDocumentBtn.addEventListener('click', () => openModal(false));
+        departmentFilter.addEventListener('change', filterDocuments);
+        addDepartmentBtn.addEventListener('click', addDepartment);
+        addStatusBtn.addEventListener('click', handleStatusSubmit);
+        uploadLogoButton.addEventListener('click', uploadLogo);
+        
+        // New event listeners for the contact modal
+        contactDeveloperButton.addEventListener('click', openContactModal);
+        closeContactModalBtn.addEventListener('click', closeContactModal);
+        contactForm.addEventListener('submit', handleContactSubmit);
+
+        // Initial view setup
+        fetchSiteConfigs();
+        showPage('public');
+    </script>
+</body>
+
+</html>
