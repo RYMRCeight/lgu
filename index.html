@@ -1335,7 +1335,10 @@ documentForm.addEventListener('submit', async (e) => {
                  <tr>
                     <td class="px-6 py-4 text-sm text-gray-500">${formattedDate}</td>
                     <td class="px-6 py-4 text-sm text-gray-800">${entry.department || '—'}</td>
-                   <td class="px-6 py-4 text-sm text-gray-800">${entry.action || entry.status}</td>
+                   <td class="px-6 py-4 text-sm text-gray-800">${entry.action || '—'}
+                ${entry.status && entry.status !== entry.action ? ` (${entry.status})` : ""}
+                </td>
+
                     <td class="px-6 py-4 text-sm text-gray-800">${entry.received_by || '—'}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${duration}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${entry.remarks || '—'}</td>
