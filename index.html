@@ -473,7 +473,61 @@ if (isLoggedIn) {
     const confirmNoBtn = document.getElementById('confirm-no-btn');
     let confirmAction = null;
 
+// ADD THIS CODE to enable Save Document function
 
+documentForm.addEventListener('submit', handleDocumentSave);
+
+async function handleDocumentSave(event) {
+    event.preventDefault();
+
+    // Get values from form
+    const docId = documentIdInput.value;
+    const title = documentTitleInput.value.trim();
+    const department = documentDepartmentInput.value;
+    const submitter = documentSubmitterInput.value.trim();
+    const status = documentStatusInput.value;
+    const remarks = documentRemarksInput.value.trim();
+
+    // Validation (optional)
+    if (!title || !department || !submitter || !status) {
+        showStatusModal('Please fill out all required fields.');
+        return;
+    }
+
+    // Prepare data object
+    const docData = {
+        title,
+        department,
+        submitter,
+        status,
+        remarks
+    };
+
+    let error;
+    if (docId) {
+        // Edit existing document
+        const { error: updateError } = await supabase
+            .from('documents')
+            .update(docData)
+            .eq('id', docId);
+        error = updateError;
+    } else {
+        // Create new document
+        const { error: insertError } = await supabase
+            .from('documents')
+            .insert([docData]);
+        error = insertError;
+    }
+
+    if (error) {
+        showStatusModal('Error saving document: ' + error.message);
+        return;
+    }
+
+    closeModal();
+    showStatusModal('Document saved successfully!');
+    fetchDocuments(); // Refresh the list
+}
     // Simple client-side router
     function showPage(pageName) {
         publicPage.classList.add('hidden');
