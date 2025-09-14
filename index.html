@@ -1095,77 +1095,77 @@ if (isLoggedIn) {
     adminPageButton.addEventListener('click', () => showPage('admin'));
     closeStatusModalBtn.addEventListener('click', () => statusModal.classList.add('hidden'));
 
-    documentForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const docId = documentIdInput.value;
-    const title = documentTitleInput.value;
-    const department = documentDepartmentInput.value;
-    const submitter = documentSubmitterInput.value;
-    const status = documentStatusInput.value;
-    // New variable for remarks
-    const remarks = documentRemarksInput.value;
+ documentForm.addEventListener('submit', async (e) => {
+e.preventDefault();
+const docId = documentIdInput.value;
+const title = documentTitleInput.value;
+const department = documentDepartmentInput.value;
+const submitter = documentSubmitterInput.value;
+const status = documentStatusInput.value;
+// New variable for remarks
+const remarks = documentRemarksInput.value;
 
-    let documentNumber = '';
-    if (!docId) {
-        // ... (existing code for new document)
+let documentNumber = '';
+if (!docId) {
+    // ... (existing code for new document)
+}
+
+const documentData = {
+    title: title,
+    department: department,
+    submitter: submitter,
+    status: status,
+    documentNumber: documentNumber || documents.find(d => d.id === docId).documentNumber,
+    processingDays: 0 // This will be calculated on a future update
+};
+
+documentSaveBtn.textContent = 'Saving...';
+documentSaveBtn.disabled = true;
+
+let error = null;
+let newDocId = docId;
+
+if (docId) {
+    // Update existing document
+    const { error: updateError } = await supabase
+        .from('documents')
+        .update(documentData)
+        .eq('id', docId);
+    error = updateError;
+} else {
+    // Add new document
+    const { data, error: insertError } = await supabase
+        .from('documents')
+        .insert([documentData])
+        .select(); // Add .select() to get the new document's data, including its ID
+    error = insertError;
+    if (data && data.length > 0) {
+        newDocId = data[0].id; // Store the new ID
     }
+}
 
-    const documentData = {
-        title: title,
-        department: department,
-        submitter: submitter,
+if (error) {
+    console.error('Error saving document:', error.message);
+    showStatusModal(`Error saving document: ${error.message}`);
+} else {
+    // --- Add a new history entry ---
+    const historyEntry = {
+        document_id: newDocId,
         status: status,
-        documentNumber: documentNumber || documents.find(d => d.id === docId).documentNumber,
-        processingDays: 0 // This will be calculated on a future update
+        remarks: remarks
     };
+    const { error: historyError } = await supabase.from('document_history').insert([historyEntry]);
 
-    documentSaveBtn.textContent = 'Saving...';
-    documentSaveBtn.disabled = true;
-
-    let error = null;
-    let newDocId = docId;
-
-    if (docId) {
-        // Update existing document
-        const { error: updateError } = await supabase
-            .from('documents')
-            .update(documentData)
-            .eq('id', docId);
-        error = updateError;
-    } else {
-        // Add new document
-        const { data, error: insertError } = await supabase
-            .from('documents')
-            .insert([documentData])
-            .select(); // Add .select() to get the new document's data, including its ID
-        error = insertError;
-        if (data && data.length > 0) {
-            newDocId = data[0].id; // Store the new ID
-        }
+    if (historyError) {
+        console.error('Error saving document history:', historyError.message);
     }
 
-    if (error) {
-        console.error('Error saving document:', error.message);
-        showStatusModal(`Error saving document: ${error.message}`);
-    } else {
-        // --- Add a new history entry ---
-        const historyEntry = {
-            document_id: newDocId,
-            status: status,
-            remarks: remarks
-        };
-        const { error: historyError } = await supabase.from('document_history').insert([historyEntry]);
+    showStatusModal(`Document saved successfully!`);
+}
 
-        if (historyError) {
-            console.error('Error saving document history:', historyError.message);
-        }
-
-        showStatusModal(`Document saved successfully!`);
-    }
-
-    documentSaveBtn.textContent = 'Save Document';
-    documentSaveBtn.disabled = false;
-    closeModal();
+documentSaveBtn.textContent = 'Save Document';
+documentSaveBtn.disabled = false;
+closeModal();
 });
 
 // Utility function to format duration
