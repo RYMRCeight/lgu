@@ -1033,17 +1033,19 @@ async function handleDocumentSave(event) {
     }
 
     // Global functions for card click handlers
-    window.editDocument = function(docId) {
-        const docToEdit = documents.find(doc => doc.id === docId);
-        if (docToEdit) {
-            documentIdInput.value = docToEdit.id;
-            documentTitleInput.value = docToEdit.title;
-            documentDepartmentInput.value = docToEdit.department;
-            documentSubmitterInput.value = docToEdit.submitter;
-            documentStatusInput.value = docToEdit.status;
-            openModal(true);
-        }
-    };
+   window.editDocument = function(docId) {
+    const docToEdit = documents.find(doc => doc.id === docId);
+    if (docToEdit) {
+        documentIdInput.value = docToEdit.id;
+        documentTitleInput.value = docToEdit.title;
+        documentDepartmentInput.value = docToEdit.department;
+        documentSubmitterInput.value = docToEdit.submitter;
+        documentStatusInput.value = docToEdit.status;
+        documentRemarksInput.value = docToEdit.remarks || '';
+        document.getElementById('document-received-by').value = docToEdit.received_by || '';
+        openModal(true);
+    }
+};
 
     window.editStatus = function(id, name) {
         editingStatusId = id;
@@ -1213,6 +1215,7 @@ documentForm.addEventListener('submit', async (e) => {
                 submitter: submitter,
                 status: status,
                 remarks: remarks
+                received_by: receivedBy
             })
             .eq('id', docId);
         error = updateError;
@@ -1238,8 +1241,9 @@ documentForm.addEventListener('submit', async (e) => {
                 department: department,
                 submitter: submitter,
                 status: status,
-                documentNumber: documentNumber,
                 remarks: remarks,
+                received_by: receivedBy,   // ✅ added
+                documentNumber: documentNumber,
                 processingDays: 0
             }])
             .select();
@@ -1258,6 +1262,7 @@ documentForm.addEventListener('submit', async (e) => {
             document_id: newDocId,
             status: status,
             remarks: remarks
+            received_by: receivedBy
         };
         const { error: historyError } = await supabase.from('document_history').insert([historyEntry]);
 
