@@ -59,7 +59,89 @@ font-family: 'Inter', sans-serif;
             </nav>
         </div>
     <script>
-        
+        // Simulate login state
+document.addEventListener('DOMContentLoaded', function() {
+let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    function updateVisibility() {
+        const adminButton = document.getElementById('admin-page-button');
+const adminButton = document.getElementById('admin-page-button');
+        const contactButton = document.getElementById('contact-developer-button');
+const contactButton = document.getElementById('contact-developer-button');      
+if (isLoggedIn) {
+            adminButton.style.display = 'none';
+            contactButton.style.display = 'none';
+        } else {
+            adminButton.style.display = 'block';
+            contactButton.style.display = 'block';
+        if (isLoggedIn) {
+            adminButton.style.display = 'none';
+            contactButton.style.display = 'none';
+        } else {
+            adminButton.style.display = 'block';
+            contactButton.style.display = 'block';
+        }
+    }
+    }
+
+    // Call updateVisibility on page load
+    updateVisibility();
+
+    // Toggle for demo purposes
+    const loginButton = document.getElementById('admin-login-btn');
+    const signOutButton = document.getElementById('sign-out-btn');
+
+    loginButton.addEventListener('click', function() {
+        isLoggedIn = true;
+        isLoggedIn = false;
+        localStorage.setItem('isLoggedIn', 'false');
+        updateVisibility();
+('isLoggedIn', 'true');
+        updateVisibility();
+   });
+
+   // Add event listeners for public and contact developer buttons
+   publicButton.addEventListener('click', function() {
+       if (!isLoggedIn) {
+           // Add behavior for public button
+           console.log('Public button clicked');
+       }
+   });
+
+   contactButton.addEventListener('click', function() {
+       if (!isLoggedIn) {
+           // Add behavior for contact developer button
+           console.log('Contact Developer button clicked');
+       }
+   });
+
+    signOutButton.addEventListener('click', function() {
+        isLoggedIn = false;
+        updateVisibility();
+    });
+});
+
+        function updateVisibility() {
+            const publicButton = document.getElementById('public-page-button');
+            const contactButton = document.getElementById('contact-developer-button');
+            
+            if (isLoggedIn) {
+                publicButton.style.display = 'none';
+                contactButton.style.display = 'none';
+            } else {
+                publicButton.style.display = 'block';
+                contactButton.style.display = 'block';
+            }
+        }
+
+        // Example: call this function after login status changes
+        document.getElementById('admin-login-btn').addEventListener('click', function() {
+            isLoggedIn = !isLoggedIn; // toggle for demo purposes
+            updateVisibility();
+        });
+
+        updateVisibility(); // Initial call
+    </script>
 </header>
 
     <main class="py-10">
@@ -641,8 +723,7 @@ async function handleDocumentSave(event) {
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500 mb-2">
                 <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
-                <span><span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingdays}
-
+                <span><span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
                 <span>Created: <span class="font-medium">${createdAt}</span></span>
@@ -835,7 +916,7 @@ async function handleDocumentSave(event) {
 
             <!-- Extra Info -->
             <p class="text-sm text-gray-500">
-               <span class="font-medium text-gray-600">Document No:</span> ${doc.documentnumber || doc.id}
+                <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber || doc.id}
             </p>
             <p class="text-sm text-gray-500">
                 <span class="font-medium text-gray-600">Department:</span> ${doc.department}
@@ -952,19 +1033,17 @@ async function handleDocumentSave(event) {
     }
 
     // Global functions for card click handlers
-   window.editDocument = function(docId) {
-    const docToEdit = documents.find(doc => doc.id === docId);
-    if (docToEdit) {
-        documentIdInput.value = docToEdit.id;
-        documentTitleInput.value = docToEdit.title;
-        documentDepartmentInput.value = docToEdit.department;
-        documentSubmitterInput.value = docToEdit.submitter;
-        documentStatusInput.value = docToEdit.status;
-        documentRemarksInput.value = docToEdit.remarks || '';
-        document.getElementById('document-received-by').value = docToEdit.received_by || '';
-        openModal(true);
-    }
-};
+    window.editDocument = function(docId) {
+        const docToEdit = documents.find(doc => doc.id === docId);
+        if (docToEdit) {
+            documentIdInput.value = docToEdit.id;
+            documentTitleInput.value = docToEdit.title;
+            documentDepartmentInput.value = docToEdit.department;
+            documentSubmitterInput.value = docToEdit.submitter;
+            documentStatusInput.value = docToEdit.status;
+            openModal(true);
+        }
+    };
 
     window.editStatus = function(id, name) {
         editingStatusId = id;
@@ -1134,7 +1213,6 @@ documentForm.addEventListener('submit', async (e) => {
                 submitter: submitter,
                 status: status,
                 remarks: remarks
-                received_by: receivedBy
             })
             .eq('id', docId);
         error = updateError;
@@ -1160,10 +1238,9 @@ documentForm.addEventListener('submit', async (e) => {
                 department: department,
                 submitter: submitter,
                 status: status,
+                documentNumber: documentNumber,
                 remarks: remarks,
-                received_by: receivedBy,   // ✅ added
-                documentnumber: documentNumber,
-                processingdays: 0
+                processingDays: 0
             }])
             .select();
         error = insertError;
@@ -1181,7 +1258,6 @@ documentForm.addEventListener('submit', async (e) => {
             document_id: newDocId,
             status: status,
             remarks: remarks
-            received_by: receivedBy
         };
         const { error: historyError } = await supabase.from('document_history').insert([historyEntry]);
 
