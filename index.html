@@ -489,15 +489,18 @@ if (isLoggedIn) {
 
     // --- Supabase Auth Logic ---
     // This listener will check for authentication state changes (login/logout)
-     supabase.auth.onAuthStateChange((event, session) => {
-        isAuthReady = true;
+    supabase.auth.onAuthStateChange((event, session) => {
+    isAuthReady = true; // Confirm initial auth check is complete
+    
+    // Hide the loading page now that auth state is known
+    loadingPage.classList.add('hidden');
+        
         if (session) {
             // User is logged in, show the admin content and hide the admin button
             adminPage.classList.remove('hidden');
             adminLoginContainer.classList.add('hidden');
             adminContent.classList.remove('hidden');
             adminPageButton.style.display = 'none'; // Hide the Admin button
-            contactDeveloperButton.style.display = 'none'; // Hide the Contact Developer button
             publicPageButton.style.display = 'none'; // Hide the Public button
             fetchDocuments();
             fetchDepartments();
