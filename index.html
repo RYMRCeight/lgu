@@ -1435,14 +1435,13 @@ receiveBtn.addEventListener('click', async () => {
     }
 
     // 1. Insert into history
-    const { error: historyError } = await supabase.from('document_history').insert([{
-        document_id: docId,
-        action: 'Received',
-        received_by: receivedBy,
-        department: documentDepartmentInput.value,
-        status: "In Process",   // auto-set status in history
-        remarks: documentRemarksInput.value
-    }]);
+  const { error: historyError } = await supabase.from('document_history').insert([{
+    document_id: docId,
+    action: 'Received',
+    received_by: receivedBy,
+    department: documentDepartmentInput.value,
+    remarks: documentRemarksInput.value
+}]);
 
     if (historyError) {
         console.error('Error adding history:', historyError.message);
@@ -1451,10 +1450,9 @@ receiveBtn.addEventListener('click', async () => {
     }
 
     // 2. Update document status
-    const { error: updateError } = await supabase
-        .from('documents')
-        .update({ status: "In Process" })
-        .eq('id', docId);
+    const { error: updateError } = await supabase.from('documents')
+    .update({ status: "In Process" })
+    .eq('id', docId);
 
     if (updateError) {
         console.error('Error updating document status:', updateError.message);
