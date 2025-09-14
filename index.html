@@ -321,6 +321,11 @@ if (isLoggedIn) {
                 <input type="text" id="document-submitter" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
             </div>
             <div>
+                <label for="document-received-by" class="block text-sm font-medium text-gray-700">Received By</label>
+                <input type="text" id="document-received-by" required 
+                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+            </div>
+            <div>
                 <label for="document-status" class="block text-sm font-medium text-gray-700">Status</label>
                 <select id="document-status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     <option value="">Select a Status</option>
@@ -372,17 +377,19 @@ if (isLoggedIn) {
         </div>
         <div id="history-table-container" class="overflow-y-auto max-h-[70vh]">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action Done</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body" class="bg-white divide-y divide-gray-200">
-                    </tbody>
-            </table>
+  <thead class="bg-gray-50">
+    <tr>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date/Time</th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action Done</th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Received By</th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remarks</th>
+    </tr>
+  </thead>
+  <tbody id="history-table-body"></tbody>
+</table>
+
         </div>
     </div>
 </div>
@@ -1187,7 +1194,7 @@ documentForm.addEventListener('submit', async (e) => {
     const submitter = documentSubmitterInput.value;
     const status = documentStatusInput.value;
     const remarks = documentRemarksInput.value;
-
+    const receivedBy = document.getElementById('document-received-by').value.trim();
     let documentNumber = '';
     let newDocId = docId;
 
@@ -1321,12 +1328,14 @@ documentForm.addEventListener('submit', async (e) => {
             previousDate = entryDate;
 
             return `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${entry.status}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${duration}</td>
+                 <tr>
+                    <td class="px-6 py-4 text-sm text-gray-500">${formattedDate}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">${entry.department || '—'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">${entry.status}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">${entry.received_by || '—'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${duration}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${entry.remarks || '—'}</td>
-                </tr>
+                 </tr>
             `;
         }).join('');
 
