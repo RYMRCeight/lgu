@@ -1464,7 +1464,7 @@ receiveBtn.addEventListener('click', async () => {
     }
 });
 
-    releaseBtn.addEventListener('click', async () => {
+   releaseBtn.addEventListener('click', async () => {
     const docId = documentIdInput.value;
 
     if (!docId) {
@@ -1472,12 +1472,11 @@ receiveBtn.addEventListener('click', async () => {
         return;
     }
 
-    // 1. Insert into history
+    // 1. Insert into history (action only, no status)
     const { error: historyError } = await supabase.from('document_history').insert([{
         document_id: docId,
         action: 'Released',
         department: documentDepartmentInput.value,
-        status: "Forwarded",   // auto-set status in history
         remarks: documentRemarksInput.value
     }]);
 
@@ -1487,7 +1486,7 @@ receiveBtn.addEventListener('click', async () => {
         return;
     }
 
-    // 2. Update document status
+    // 2. Update document status (kept separate)
     const { error: updateError } = await supabase
         .from('documents')
         .update({ status: "Forwarded" })
