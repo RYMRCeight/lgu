@@ -723,7 +723,8 @@ async function handleDocumentSave(event) {
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500 mb-2">
                 <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
-                <span><span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}</span>
+                <span><span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingdays}
+
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
                 <span>Created: <span class="font-medium">${createdAt}</span></span>
@@ -916,7 +917,7 @@ async function handleDocumentSave(event) {
 
             <!-- Extra Info -->
             <p class="text-sm text-gray-500">
-                <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber || doc.id}
+               <span class="font-medium text-gray-600">Document No:</span> ${doc.documentnumber || doc.id}
             </p>
             <p class="text-sm text-gray-500">
                 <span class="font-medium text-gray-600">Department:</span> ${doc.department}
@@ -1243,8 +1244,8 @@ documentForm.addEventListener('submit', async (e) => {
                 status: status,
                 remarks: remarks,
                 received_by: receivedBy,   // ✅ added
-                documentNumber: documentNumber,
-                processingDays: 0
+                documentnumber: documentNumber,
+                processingdays: 0
             }])
             .select();
         error = insertError;
