@@ -495,27 +495,6 @@ if (isLoggedIn) {
     const confirmNoBtn = document.getElementById('confirm-no-btn');
     let confirmAction = null;
 
-// ADD THIS CODE to enable Save Document function
-
-documentForm.addEventListener('submit', handleDocumentSave);
-
-async function handleDocumentSave(event) {
-    event.preventDefault();
-
-    // Get values from form
-    const docId = documentIdInput.value;
-    const title = documentTitleInput.value.trim();
-    const department = documentDepartmentInput.value;
-    const submitter = documentSubmitterInput.value.trim();
-    const status = documentStatusInput.value;
-    const remarks = documentRemarksInput.value.trim();
-
-    // Validation (optional)
-    if (!title || !department || !submitter || !status) {
-        showStatusModal('Please fill out all required fields.');
-        return;
-    }
-
     // Prepare data object
     const docData = {
         title,
@@ -1209,9 +1188,11 @@ documentForm.addEventListener('submit', async (e) => {
     const submitter = documentSubmitterInput.value;
     const status = documentStatusInput.value;
     const remarks = documentRemarksInput.value;
-    const receivedBy = document.getElementById('document-received-by').value.trim();
+    const receivedBy = document.getElementById('document-received-by').value.trim(); // You had this, but need to decide how it's used with 'Received' button
     let documentNumber = '';
     let newDocId = docId;
+    let historyAction = ''; // To store the action for history
+    let initialStatus = ''; // To store the status before any change
 
     documentSaveBtn.textContent = 'Saving...';
     documentSaveBtn.disabled = true;
@@ -1219,6 +1200,24 @@ documentForm.addEventListener('submit', async (e) => {
     let error = null;
 
     if (docId) {
+        // Existing document - Fetch current status before update
+        const { data: existingDocData, error: fetchError } = await supabase
+            .from('documents')
+            .select('status, documentNumber')
+            .eq('id', docId)
+            .single();
+
+        if (fetchError) {
+            console.error('Error fetching existing document:', fetchError.message);
+            showStatusModal(`Error saving document: ${fetchError.message}`);
+            documentSaveBtn.textContent = 'Save Document';
+            documentSaveBtn.disabled = false;
+            return;
+        }
+
+        initialStatus = existingDocData.status;
+        documentNumber = existingDocData.documentNumber;
+
         // Update existing document
         const { error: updateError } = await supabase
             .from('documents')
@@ -1227,24 +1226,37 @@ documentForm.addEventListener('submit', async (e) => {
                 department: department,
                 submitter: submitter,
                 status: status,
-                remarks: remarks
+                remarks: remarks,
+                // Do not update documentNumber or processingDays here, they are not changed by a simple edit form
             })
             .eq('id', docId);
         error = updateError;
-        if (!error) {
-            // Get the existing document number for history logging
-            const existingDoc = documents.find(d => d.id === docId);
-            if (existingDoc) {
-                documentNumber = existingDoc.documentNumber;
-            }
+        historyAction = 'Updated'; // General update action
+
+        // If status changed, log it specifically
+        if (initialStatus !== status) {
+            historyAction = `Status Changed to ${status}`;
         }
     } else {
         // Add new document
         const today = new Date();
         const year = today.getFullYear().toString().slice(-2);
         const month = (today.getMonth() + 1).toString().padStart(2, '0');
-        const count = documents.length + 1;
-        documentNumber = `LGU-${year}${month}-${count}`;
+        // Calculate the next document number based on existing documents
+        const { data: lastDoc, error: lastDocError } = await supabase
+            .from('documents')
+            .select('documentNumber')
+            .order('created_at', { ascending: false }) // Or by documentNumber if it's a number
+            .limit(1);
+
+        let nextCount = 1;
+        if (lastDoc && lastDoc.length > 0) {
+            const lastNum = parseInt(lastDoc[0].documentNumber.split('-').pop());
+            if (!isNaN(lastNum)) {
+                nextCount = lastNum + 1;
+            }
+        }
+        documentNumber = `LGU-${year}${month}-${String(nextCount).padStart(3, '0')}`; // Ensure 3 digits for count
         
         const { data, error: insertError } = await supabase
             .from('documents')
@@ -1255,20 +1267,37 @@ documentForm.addEventListener('submit', async (e) => {
                 status: status,
                 documentNumber: documentNumber,
                 remarks: remarks,
-                processingDays: 0
+                processingDays: 0, // Initial processing days
+                // received_by: receivedBy // Only if this is the *first* receive action, otherwise manage via specific buttons
             }])
             .select();
         error = insertError;
         if (data && data.length > 0) {
             newDocId = data[0].id;
         }
+        historyAction = 'Submitted'; // Action for new document
     }
 
     if (error) {
         console.error('Error saving document:', error.message);
         showStatusModal(`Error saving document: ${error.message}`);
     } else {
-        showStatusModal(`Document saved successfully!`);
+        // Log history after successful document save/update
+        const { error: historyLogError } = await supabase.from('document_history').insert([{
+            document_id: newDocId, // Use newDocId in case it was a new document
+            action: historyAction,
+            department: department,
+            status: status, // Log the current status of the document
+            received_by: (historyAction === 'Submitted' && receivedBy) ? receivedBy : null, // Only log received_by for initial submission if applicable
+            remarks: remarks
+        }]);
+
+        if (historyLogError) {
+            console.error('Error logging document history:', historyLogError.message);
+            showStatusModal(`Document saved, but error logging history: ${historyLogError.message}`);
+        } else {
+            showStatusModal(`Document saved successfully!`);
+        }
         documentForm.reset();
     }
 
