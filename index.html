@@ -861,42 +861,61 @@ async function handleDocumentSave(event) {
         }
     }
 
-    function renderDocumentCard(doc) {
-        const statusColors = {
-            'Submitted': 'bg-blue-100 text-blue-800',
-            'Reviewing': 'bg-yellow-100 text-yellow-800',
-            'Approved': 'bg-green-100 text-green-800',
-            'Rejected': 'bg-red-100 text-red-800'
-        };
-        const statusBadgeClass = statusColors[doc.status] || 'bg-gray-100 text-gray-800';
-        
-        // Format the dates for display
-        const createdAt = new Date(doc.created_at).toLocaleString();
-        const updatedAt = new Date(doc.updated_at).toLocaleString();
+  function renderDocumentCard(doc) {
+    const statusColors = {
+        'Submitted': 'bg-blue-100 text-blue-800',
+        'Reviewing': 'bg-yellow-100 text-yellow-800',
+        'Approved': 'bg-green-100 text-green-800',
+        'Rejected': 'bg-red-100 text-red-800'
+    };
+    const statusBadgeClass = statusColors[doc.status] || 'bg-gray-100 text-gray-800';
+    
+    // Format the dates for display
+    const createdAt = new Date(doc.created_at).toLocaleString();
+    const updatedAt = new Date(doc.updated_at).toLocaleString();
 
     return `
-            <div class="bg-white rounded-lg shadow-md p-6 document-card relative">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-semibold text-gray-800 truncate">${doc.title}</h3>
-                    <div class="flex items-center space-x-2 absolute top-4 right-4">
-                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusBadgeClass} ring-1 ring-inset ring-gray-200">
-                            ${doc.status}
-                        </span>
-                        <button onclick="openHistoryModal('${doc.id}')" class="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </button>
-                        <button onclick="editDocument('${doc.id}')" class="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </button>
-                    </div>
+        <div class="bg-white rounded-lg shadow-md p-6 document-card relative">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold text-gray-800 truncate">${doc.title}</h3>
+                <div class="flex items-center space-x-2 absolute top-4 right-4">
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusBadgeClass} ring-1 ring-inset ring-gray-200">
+                        ${doc.status}
+                    </span>
+                    
+                    <button onclick="openHistoryModal('${doc.id}')" class="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition">
+                        <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    <button onclick="editDocument('${doc.id}')" class="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition">
+                        <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </button>
                 </div>
-                </div>
-        `;
-    }
+            </div>
+
+            <!-- Extra Info -->
+            <p class="text-sm text-gray-500">
+                <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber || doc.id}
+            </p>
+            <p class="text-sm text-gray-500">
+                <span class="font-medium text-gray-600">Department:</span> ${doc.department}
+            </p>
+            <p class="text-sm text-gray-500 mb-2">
+                <span class="font-medium text-gray-600">Submitted by:</span> ${doc.submitter}
+            </p>
+
+            <!-- Timestamps -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
+                <span>Created: <span class="font-medium">${createdAt}</span></span>
+                <span>Last Updated: <span class="font-medium">${updatedAt}</span></span>
+            </div>
+        </div>
+    `;
+}
+
 
     function renderDocumentList(filteredDocuments) {
         documentListContainer.innerHTML = '';
