@@ -689,31 +689,37 @@ async function handleDocumentSave(event) {
             publicNoResults.classList.remove('hidden');
         } else {
             publicResultsContainer.innerHTML = data.map(doc => {
-                const createdAt = new Date(doc.created_at).toLocaleString();
-                const updatedAt = new Date(doc.updated_at).toLocaleString();
-                return `
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <h3 class="text-lg font-semibold text-gray-800">${doc.title}</h3>
-                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 ring-1 ring-inset ring-gray-200">
-                            ${doc.status}
-                        </span>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-2">
-                        <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber}
-                    </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500 mb-2">
-                        <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
-                        <span>
-                            <span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
-                        <span>Created: <span class="font-medium">${createdAt}</span></span>
-                        <span>Last Updated: <span class="font-medium">${updatedAt}</span></span>
-                    </div>
-                </div>
-            `}).join('');
+    const createdAt = new Date(doc.created_at).toLocaleString();
+    const updatedAt = new Date(doc.updated_at).toLocaleString();
+    return `
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold text-gray-800">${doc.title}</h3>
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 ring-1 ring-inset ring-gray-200">
+                    ${doc.status}
+                </span>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">
+                <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber}
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500 mb-2">
+                <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
+                <span>
+                    <span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}
+                </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400 mb-3">
+                <span>Created: <span class="font-medium">${createdAt}</span></span>
+                <span>Last Updated: <span class="font-medium">${updatedAt}</span></span>
+            </div>
+            <!-- NEW: Track History Button -->
+            <button onclick="openHistoryModal('${doc.id}')" 
+                class="mt-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition">
+                Track History
+            </button>
+        </div>
+    `;
+}).join('');
         }
     }
 
