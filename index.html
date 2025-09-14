@@ -344,6 +344,21 @@ if (isLoggedIn) {
                     <button type="submit" id="document-save-btn" class="rounded-md lgu-gradient px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">Save Document</button>
                 </div>
             </div>
+            <!-- Document Action Buttons -->
+<div class="mt-4 flex space-x-2">
+    <button type="button" id="receive-document-btn" 
+        class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700">
+        Receive Document
+    </button>
+    <button type="button" id="release-document-btn" 
+        class="rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-600">
+        Release Document
+    </button>
+    <button type="button" id="complete-document-btn" 
+    class="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+    Complete Document
+</button>
+</div>
         </form>
     </div>
 </div>
@@ -1253,17 +1268,6 @@ documentForm.addEventListener('submit', async (e) => {
         console.error('Error saving document:', error.message);
         showStatusModal(`Error saving document: ${error.message}`);
     } else {
-        // Add a new history entry
-        const historyEntry = {
-            document_id: newDocId,
-            status: status,
-            remarks: remarks
-        };
-        const { error: historyError } = await supabase.from('document_history').insert([historyEntry]);
-
-        if (historyError) {
-            console.error('Error saving document history:', historyError.message);
-        }
         showStatusModal(`Document saved successfully!`);
         documentForm.reset();
     }
@@ -1331,7 +1335,7 @@ documentForm.addEventListener('submit', async (e) => {
                  <tr>
                     <td class="px-6 py-4 text-sm text-gray-500">${formattedDate}</td>
                     <td class="px-6 py-4 text-sm text-gray-800">${entry.department || '—'}</td>
-                    <td class="px-6 py-4 text-sm text-gray-800">${entry.status}</td>
+                   <td class="px-6 py-4 text-sm text-gray-800">${entry.action || entry.status}</td>
                     <td class="px-6 py-4 text-sm text-gray-800">${entry.received_by || '—'}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${duration}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${entry.remarks || '—'}</td>
@@ -1384,6 +1388,163 @@ documentForm.addEventListener('submit', async (e) => {
     closeHistoryModalBtn.addEventListener('click', () => {
     historyModal.classList.add('hidden');
 });
+// Receive & Release Document
+// ============================
+const receiveBtn = document.getElementById('receive-document-btn');
+const releaseBtn = document.getElementById('release-document-btn');
+
+receiveBtn.addEventListener('click', async () => {
+    const docId = documentIdInput.value;
+    const receivedBy = document.getElementById('document-received-by').value.trim();
+
+    if (!docId || !receivedBy) {
+        showStatusModal("Please select a document and enter who received it.");
+        return;
+    }
+
+    const { error } = await supabase.from('document_history').insert([{
+        document_id: docId,
+        action: 'Received',
+        received_by: receivedBy,
+        department: documentDepartmentInput.value,
+        status: documentStatusInput.value,
+        remarks: documentRemarksInput.value
+    }]);
+
+    if (error) {
+        console.error('Error adding history:', error.message);
+        showStatusModal(`Error logging receive action: ${error.message}`);
+    } else {
+        showStatusModal("✅ Document received successfully!");
+        openHistoryModal(docId);
+    }
+});
+
+receiveBtn.addEventListener('click', async () => {
+    const docId = documentIdInput.value;
+    const receivedBy = document.getElementById('document-received-by').value.trim();
+
+    if (!docId || !receivedBy) {
+        showStatusModal("Please select a document and enter who received it.");
+        return;
+    }
+
+    // 1. Insert into history
+    const { error: historyError } = await supabase.from('document_history').insert([{
+        document_id: docId,
+        action: 'Received',
+        received_by: receivedBy,
+        department: documentDepartmentInput.value,
+        status: "In Process",   // auto-set status in history
+        remarks: documentRemarksInput.value
+    }]);
+
+    if (historyError) {
+        console.error('Error adding history:', historyError.message);
+        showStatusModal(`Error logging receive action: ${historyError.message}`);
+        return;
+    }
+
+    // 2. Update document status
+    const { error: updateError } = await supabase
+        .from('documents')
+        .update({ status: "In Process" })
+        .eq('id', docId);
+
+    if (updateError) {
+        console.error('Error updating document status:', updateError.message);
+        showStatusModal(`Error updating document status: ${updateError.message}`);
+    } else {
+        showStatusModal("✅ Document received and status set to In Process!");
+        fetchDocuments(); // refresh list
+        openHistoryModal(docId); // refresh history
+    }
+});
+
+    releaseBtn.addEventListener('click', async () => {
+    const docId = documentIdInput.value;
+
+    if (!docId) {
+        showStatusModal("Please select a document first.");
+        return;
+    }
+
+    // 1. Insert into history
+    const { error: historyError } = await supabase.from('document_history').insert([{
+        document_id: docId,
+        action: 'Released',
+        department: documentDepartmentInput.value,
+        status: "Forwarded",   // auto-set status in history
+        remarks: documentRemarksInput.value
+    }]);
+
+    if (historyError) {
+        console.error('Error adding history:', historyError.message);
+        showStatusModal(`Error logging release action: ${historyError.message}`);
+        return;
+    }
+
+    // 2. Update document status
+    const { error: updateError } = await supabase
+        .from('documents')
+        .update({ status: "Forwarded" })
+        .eq('id', docId);
+
+    if (updateError) {
+        console.error('Error updating document status:', updateError.message);
+        showStatusModal(`Error updating document status: ${updateError.message}`);
+    } else {
+        showStatusModal("📤 Document released and status set to Forwarded!");
+        fetchDocuments(); // refresh list
+        openHistoryModal(docId); // refresh history
+    }
+});
+
+    // ============================
+// Complete Document
+// ============================
+const completeBtn = document.getElementById('complete-document-btn');
+
+completeBtn.addEventListener('click', async () => {
+    const docId = documentIdInput.value;
+
+    if (!docId) {
+        showStatusModal("Please select a document first.");
+        return;
+    }
+
+    // 1. Insert into history
+    const { error: historyError } = await supabase.from('document_history').insert([{
+        document_id: docId,
+        action: 'Completed',
+        department: documentDepartmentInput.value,
+        status: "Completed",
+        remarks: documentRemarksInput.value
+    }]);
+
+    if (historyError) {
+        console.error('Error adding history:', historyError.message);
+        showStatusModal(`Error logging complete action: ${historyError.message}`);
+        return;
+    }
+
+    // 2. Update document status
+    const { error: updateError } = await supabase
+        .from('documents')
+        .update({ status: "Completed" })
+        .eq('id', docId);
+
+    if (updateError) {
+        console.error('Error updating document status:', updateError.message);
+        showStatusModal(`Error updating document status: ${updateError.message}`);
+    } else {
+        showStatusModal("✅ Document marked as Completed!");
+        fetchDocuments(); // refresh list
+        openHistoryModal(docId); // refresh history
+    }
+});
+
+    
     // Initial view setup
     fetchSiteConfigs();
     showPage('public');
