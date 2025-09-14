@@ -688,35 +688,40 @@ async function handleDocumentSave(event) {
             publicNoResults.querySelector('p').textContent = "Please check the document number/title and submitter's name and try again.";
             publicNoResults.classList.remove('hidden');
         } else {
-            publicResultsContainer.innerHTML = data.map(doc => {
+           publicResultsContainer.innerHTML = data.map(doc => {
     const createdAt = new Date(doc.created_at).toLocaleString();
     const updatedAt = new Date(doc.updated_at).toLocaleString();
     return `
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-lg font-semibold text-gray-800">${doc.title}</h3>
-                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 ring-1 ring-inset ring-gray-200">
-                    ${doc.status}
-                </span>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium 
+                        bg-blue-100 text-blue-800 ring-1 ring-inset ring-gray-200">
+                        ${doc.status}
+                    </span>
+                    <!-- Track History Icon -->
+                    <button onclick="openHistoryModal('${doc.id}')" 
+                        class="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition">
+                        <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
+            
             <p class="text-sm text-gray-500 mb-2">
                 <span class="font-medium text-gray-600">Document No:</span> ${doc.documentNumber}
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500 mb-2">
                 <span>Submitted by: <span class="font-medium text-gray-600">${doc.submitter}</span></span>
-                <span>
-                    <span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}
-                </span>
+                <span><span class="font-medium text-gray-600">Processing Days:</span> ${doc.processingDays}</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400 mb-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-400">
                 <span>Created: <span class="font-medium">${createdAt}</span></span>
                 <span>Last Updated: <span class="font-medium">${updatedAt}</span></span>
             </div>
-            <!-- NEW: Track History Button -->
-            <button onclick="openHistoryModal('${doc.id}')" 
-                class="mt-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition">
-                Track History
-            </button>
         </div>
     `;
 }).join('');
